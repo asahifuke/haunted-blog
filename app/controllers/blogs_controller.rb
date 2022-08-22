@@ -54,10 +54,18 @@ class BlogsController < ApplicationController
   end
 
   def can_not_control_other_people_blogs
-    raise ActiveRecord::RecordNotFound unless current_user == @blog.user
+    raise ActiveRecord::RecordNotFound if blog_author_not_current_user?
   end
 
   def no_access_other_people_secret_blogs
-    raise ActiveRecord::RecordNotFound if current_user != @blog.user && @blog.secret
+    raise ActiveRecord::RecordNotFound if secret_blog_author_not_current_user?
+  end
+
+  def blog_author_not_current_user?
+    @blog.user != current_user
+  end
+
+  def secret_blog_author_not_current_user?
+    blog_author_not_current_user? && @blog.secret
   end
 end
