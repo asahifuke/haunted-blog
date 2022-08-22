@@ -21,6 +21,8 @@ class Blog < ApplicationRecord
     user == target_user
   end
 
+  private
+
   def cannot_set_up_random_eyecatch_if_not_premium
     self.random_eyecatch = false unless user.premium
   end
