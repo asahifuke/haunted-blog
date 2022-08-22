@@ -62,7 +62,7 @@ class BlogsController < ApplicationController
   end
 
   def not_found_record
-    raise ActiveRecord::RecordNotFound 
+    raise ActiveRecord::RecordNotFound
   end
 
   def blog_author_not_current_user?
