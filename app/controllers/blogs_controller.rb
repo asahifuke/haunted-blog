@@ -2,16 +2,16 @@
 
 class BlogsController < ApplicationController
   skip_before_action :authenticate_user!, only: %i[index show]
-
-  before_action :set_blog, only: %i[show edit update destroy]
-  before_action :can_not_control_other_people_blogs, only: %i[edit update destroy]
-  before_action :no_access_other_people_secret_blogs, only: %i[show]
+  before_action :set_blog, only: %i[edit update destroy]
 
   def index
     @blogs = Blog.search(params[:term]).published.default_order
   end
 
-  def show; end
+  def show
+    @blog = Blog.find(params[:id])
+    @blog.user == current_user ? @blog : Blog.find_by!(id: params[:id], secret: false)
+  end
 
   def new
     @blog = Blog.new
@@ -46,30 +46,10 @@ class BlogsController < ApplicationController
   private
 
   def set_blog
-    @blog = Blog.find(params[:id])
+    @blog = Blog.find_by!(id: params[:id], user_id: current_user.id)
   end
 
   def blog_params
     params.require(:blog).permit(:title, :content, :secret, :random_eyecatch)
-  end
-
-  def can_not_control_other_people_blogs
-    not_found_record if blog_author_not_current_user?
-  end
-
-  def no_access_other_people_secret_blogs
-    not_found_record if secret_blog_author_not_current_user?
-  end
-
-  def not_found_record
-    raise ActiveRecord::RecordNotFound
-  end
-
-  def blog_author_not_current_user?
-    @blog.user != current_user
-  end
-
-  def secret_blog_author_not_current_user?
-    blog_author_not_current_user? && @blog.secret
   end
 end
